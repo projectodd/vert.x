@@ -17,10 +17,13 @@
 package org.vertx.java.deploy.impl.dynjs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.dynjs.Config;
 import org.dynjs.exception.ThrowException;
+import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
 import org.vertx.java.core.logging.Logger;
@@ -85,14 +88,29 @@ public class DynJSVerticleFactory implements VerticleFactory {
                 public GlobalObject newGlobalObject(DynJS runtime) {
                     final GlobalObject globalObject = new GlobalObject(runtime);
                     globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+                    globalObject.defineGlobalProperty("load", new AbstractNativeFunction(globalObject) {
+                        @Override
+                        public Object call(ExecutionContext context, Object self, Object... args) {                            
+                            return loadScript(context.getGlobalObject().getRuntime(), (String) args[0]);
+                        }
+                    });
                     return globalObject;
                 }
             });
             DynJS runtime = new DynJS(config);
-            File scriptFile = new File(this.scriptName);
+            loadScript(runtime, this.scriptName);
+        }
+
+        public Object loadScript(DynJS runtime, String scriptName) {
+            File scriptFile = new File(scriptName);
             if (scriptFile.exists()) {
-                runtime.newRunner().withSource(scriptFile).execute();
+                try {
+                    return runtime.newRunner().withSource(scriptFile).execute();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
+            return null;
         }
 
         @Override
