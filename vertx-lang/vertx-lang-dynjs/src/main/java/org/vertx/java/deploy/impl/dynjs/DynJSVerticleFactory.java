@@ -99,4 +99,9 @@ public class DynJSVerticleFactory implements VerticleFactory {
             // What should go here?
         }
     }
+
+
+    @Override
+    public void close() {
+    }
 }
