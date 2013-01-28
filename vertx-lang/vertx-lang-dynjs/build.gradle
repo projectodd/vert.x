@@ -15,6 +15,7 @@
  */
 
 apply from: "$rootDir/gradle/maven.gradle"
+apply plugin: 'java'
 
 repositories {
     mavenLocal()
@@ -30,3 +31,4 @@ dependencies {
 artifacts {
 	platform jar
 }
+

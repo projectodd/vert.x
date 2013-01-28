@@ -41,12 +41,14 @@ dependencies {
 	compile project(':vertx-lang-jruby')
 	compile project(':vertx-lang-jython')
 	compile project(':vertx-lang-rhino')
+	compile project(':vertx-lang-dynjs')
 
 	groovy "org.codehaus.groovy:groovy-all:$groovyVersion"
 	
 	testCompile "org.jruby:jruby:$jrubyVersion"
 	testCompile "org.python:jython-standalone:$jythonVersion"
 	testCompile "org.mozilla:rhino:$rhinoVersion"
+	testCompile "org.dynjs:dynjs:$dynjsVersion"
   testCompile files("$rootDir/src/dist/conf")
 }
 

@@ -52,6 +52,8 @@ subprojects {
   
   repositories {
     mavenCentral()
+    mavenLocal()
+    maven { url 'https://repository-projectodd.forge.cloudbees.com/upstream' }
   }
   
   dependencies {
