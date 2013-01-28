@@ -1,11 +1,11 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2011-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/maven.gradle"
-apply plugin: 'java'
+var vertx = vertx || {};
 
-sourceSets {
-	main {
-		resources {
-			srcDirs "src/main/javascript_scripts"
-		}
-	}
+if (!vertx.createDelimitedParser) {
+  vertx.createDelimitedParser = function(delim, output) {
+    return org.vertx.java.core.parsetools.RecordParser.newDelimited(delim, output);
+  }
+
+  vertx.createFixedParser = function(size, output) {
+    return org.vertx.java.core.parsetools.RecordParser.newFixed(size, output);
+  }
 }
-
-dependencies {
-	compile project(':vertx-core')
-	compile project(':vertx-platform')
-	compile "org.dynjs:dynjs:$dynjsVersion"
-}
-
-artifacts {
-	platform jar
-}
-

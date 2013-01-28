@@ -16,16 +16,22 @@
 
 package org.vertx.java.deploy.impl.dynjs;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.dynjs.Config;
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.DynJS;
+import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
+import org.dynjs.runtime.Runner;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.deploy.Verticle;
 import org.vertx.java.deploy.impl.ModuleClassLoader;
@@ -71,7 +77,6 @@ public class DynJSVerticleFactory implements VerticleFactory {
         }
     }
 
-
     private class DynJSVerticle extends Verticle {
 
         private final String scriptName;
@@ -88,29 +93,55 @@ public class DynJSVerticleFactory implements VerticleFactory {
                 public GlobalObject newGlobalObject(DynJS runtime) {
                     final GlobalObject globalObject = new GlobalObject(runtime);
                     globalObject.defineGlobalProperty("__dirname", System.getProperty("user.dir"));
+                    globalObject.defineGlobalProperty("vertx", new DynObject(globalObject));
                     globalObject.defineGlobalProperty("load", new AbstractNativeFunction(globalObject) {
                         @Override
-                        public Object call(ExecutionContext context, Object self, Object... args) {                            
-                            return loadScript(context.getGlobalObject().getRuntime(), (String) args[0]);
+                        public Object call(ExecutionContext context, Object self, Object... args) {
+                            try {
+                                return loadScript(context, (String) args[0]);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
                         }
                     });
                     return globalObject;
                 }
             });
             DynJS runtime = new DynJS(config);
-            loadScript(runtime, this.scriptName);
+            loadScript(runtime.getExecutionContext(), this.scriptName);
         }
 
-        public Object loadScript(DynJS runtime, String scriptName) {
+        public Object loadScript(ExecutionContext context, String scriptName) throws FileNotFoundException {
+            if (scriptName == null) {
+                return null;
+            }
+            System.err.println("Loading javascript: " + scriptName);
+            Runner runner = context.getGlobalObject().getRuntime().newRunner();
             File scriptFile = new File(scriptName);
+            ExecutionContext parent = context.getParent();
+            while (parent != null) {
+                context = parent;
+                parent = context.getParent();
+            }
             if (scriptFile.exists()) {
+                return runner.withContext(context).withSource(scriptFile).execute();
+            } else {
+                InputStream is = mcl.getResourceAsStream(scriptName);
+                if (is == null) {
+                    throw new FileNotFoundException("Cannot find script: " + scriptName);
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                ClassLoader old = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(mcl);
                 try {
-                    return runtime.newRunner().withSource(scriptFile).execute();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    Object ret = runner.withContext(context).withSource(reader).execute();
+                    try { is.close(); } catch (IOException ignore) { }
+                    return ret;
+                } finally {
+                    Thread.currentThread().setContextClassLoader(old);
                 }
             }
-            return null;
         }
 
         @Override
@@ -118,7 +149,6 @@ public class DynJSVerticleFactory implements VerticleFactory {
             // What should go here?
         }
     }
-
 
     @Override
     public void close() {
