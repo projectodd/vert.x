@@ -89,8 +89,9 @@ public class DynJSVerticleFactory implements VerticleFactory {
                 }
             });
             DynJS runtime = new DynJS(config);
-            if (new File(this.scriptName).exists()) {
-                runtime.newRunner().withSource(this.scriptName).execute();
+            File scriptFile = new File(this.scriptName);
+            if (scriptFile.exists()) {
+                runtime.newRunner().withSource(scriptFile).execute();
             }
         }
 

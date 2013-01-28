@@ -17,11 +17,6 @@
 apply from: "$rootDir/gradle/maven.gradle"
 apply plugin: 'java'
 
-repositories {
-    mavenLocal()
-    maven { url 'https://repository-projectodd.forge.cloudbees.com/upstream' }
-}
-
 dependencies {
 	compile project(':vertx-core')
 	compile project(':vertx-platform')

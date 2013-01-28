@@ -72,6 +72,8 @@ $APP_HOME/vertx-lang/vertx-lang-rhino/build/deps/compile/*:\
 $APP_HOME/vertx-lang/vertx-lang-groovy/build/libs/*:$APP_HOME/vertx-lang/vertx-lang-java/build/libs/*:\
 $APP_HOME/vertx-lang/vertx-lang-jruby/build/libs/*:$APP_HOME/vertx-lang/vertx-lang-jython/build/libs/*:\
 $APP_HOME/vertx-lang/vertx-lang-rhino/build/libs/*:\
+$APP_HOME/vertx-lang/vertx-lang-dynjs/build/deps/compile/*:\
+$APP_HOME/vertx-lang/vertx-lang-dynjs/build/libs/*:\
 $APP_HOME/src/dist/conf
 
 # Determine the Java command to use to start the JVM.
