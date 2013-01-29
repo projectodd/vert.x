@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-asdfasdfasdf
 (function(){
     load('core/buffer.js');
     load('core/event_bus.js');
